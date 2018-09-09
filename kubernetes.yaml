@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: flaskapp
+  name: flaskapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: flaskapp
+  template:
+    metadata:
+      labels:
+        app: flaskapp
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+      - image: albertoal/flask_webapp:0.3
+        name: flaskapp
+        env:
+        - name: FLASK_APP
+          value: "app.py"
+        # Change to development to enable debug mode  
+        - name: FLASK_ENV
+          value: "production"
+        ports:
+        - containerPort: 5000
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 100m
+            memory: 256Mi
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 5000
+          initialDelaySeconds: 15
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /alive
+            port: 5000
+          initialDelaySeconds: 20
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flaskapp
+  labels:
+    app: flaskapp
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    name: http
+    targetPort: 5000
+  selector:
+    app: flaskapp
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: flaskapp
+  annotations:
+    # Disables http redirect to https
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        backend:
+          serviceName: flaskapp
+          servicePort: 80
