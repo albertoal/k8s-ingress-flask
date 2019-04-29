@@ -21,7 +21,7 @@ spec:
         env:
         - name: FLASK_APP
           value: "app.py"
-        # Change to development to enable debug mode  
+        # Change to development to enable debug mode
         - name: FLASK_ENV
           value: "production"
         ports:

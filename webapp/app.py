@@ -8,7 +8,7 @@ def index():
 # Liveliness check
 @app.route("/alive")
 def alive():
-    return 'OK'    
+    return 'OK'
 
 # Mock readiness check
 @app.route("/ready")
@@ -17,4 +17,4 @@ def ready():
         backend='ready',
         db='ready',
         queue='ready'
-    )    
+    )
